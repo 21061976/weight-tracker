@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מעקב יומי - פרויקט ירידת משקל</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .targets {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        
+        .measurements {
+            background: #e8f5e8;
+        }
+        
+        .calories-summary {
+            background: #fff3e0;
+        }
+        
+        .meals {
+            background: #f3e5f5;
+        }
+        
+        .activities {
+            background: #e1f5fe;
+        }
+        
+        .subjective {
+            background: #fff8e1;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .meal-item {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .meal-item h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .range-container input[type="range"] {
+            flex: 1;
+        }
+        
+        .range-value {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .saved-days {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .day-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .calories-display {
+            font-size: 1.5em;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .calories-total {
+            font-weight: bold;
+            color: #2196F3;
+        }
+        
+        .calories-diff {
+            font-weight: bold;
+        }
+        
+        .calories-over {
+            color: #f44336;
+        }
+        
+        .calories-under {
+            color: #4CAF50;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 מעקב יומי - פרויקט ירידת משקל</h1>
+            <div class="targets">
+                <strong>יעד יומי: 2,416 קלוריות | גירעון מתוכנן: 282 קלוריות</strong>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>תאריך:</label>
+            <input type="date" id="date" />
+        </div>
+
+        <div class="grid-2">
+            <div class="section measurements">
+                <h3>🏃‍♂️ מדידות בוקר</h3>
+                <div class="form-group">
+                    <label>משקל (ק"ג):</label>
+                    <input type="number" step="0.1" id="weight" placeholder="90.5" />
+                </div>
+                <div class="form-group">
+                    <label>היקף מותניים (ס"מ) - אחת לשבוע:</label>
+                    <input type="number" id="waist" placeholder="95" />
+                </div>
+            </div>
+
+            <div class="section calories-summary">
+                <h3>🎯 סיכום קלוריות</h3>
+                <div class="calories-display">
+                    <div>סה"כ צריכה: <span class="calories-total" id="totalCal">0</span> קלוריות</div>
+                    <div>יעד יומי: 2,416 קלוריות</div>
+                    <div>הפרש: <span class="calories-diff" id="calDiff">--</span> קלוריות</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section meals">
+            <h3>🍽️ צריכת מזון</h3>
+            <div class="grid-4">
+                <div class="meal-item">
+                    <h4>ארוחת בוקר</h4>
+                    <div class="form-group">
+                        <input type="text" id="breakfast-food" placeholder="מה אכלת?" />
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="breakfast-cal" placeholder="קלוריות" />
+                    </div>
+                </div>
+                
+                <div class="meal-item">
+                    <h4>ארוחת צהריים</h4>
+                    <div class="form-group">
+                        <input type="text" id="lunch-food" placeholder="מה אכלת?" />
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="lunch-cal" placeholder="קלוריות" />
+                    </div>
+                </div>
+                
+                <div class="meal-item">
+                    <h4>ארוחת ערב</h4>
+                    <div class="form-group">
+                        <input type="text" id="dinner-food" placeholder="מה אכלת?" />
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="dinner-cal" placeholder="קלוריות" />
+                    </div>
+                </div>
+                
+                <div class="meal-item">
+                    <h4>חטיפים</h4>
+                    <div class="form-group">
+                        <input type="text" id="snacks-food" placeholder="מה אכלת?" />
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="snacks-cal" placeholder="קלוריות" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section activities">
+            <h3>💪 פעילות גופנית</h3>
+            <div class="grid-2">
+                <div>
+                    <div class="form-group">
+                        <label>יוגה אשטנגה (דקות):</label>
+                        <input type="number" id="yoga" placeholder="75" />
+                    </div>
+                    <div class="form-group">
+                        <label>טניס (דקות):</label>
+                        <input type="number" id="tennis" placeholder="90" />
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>הליכה (צעדים):</label>
+                        <input type="number" id="steps" placeholder="2000" />
+                    </div>
+                    <div class="form-group">
+                        <label>עבודה (שעות):</label>
+                        <input type="number" step="0.5" id="work" placeholder="8" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section subjective">
+            <h3>😊 מדדים סובייקטיביים (1-10)</h3>
+            <div class="grid-2">
+                <div>
+                    <div class="form-group">
+                        <label>רמת רעב:</label>
+                        <div class="range-container">
+                            <span>1</span>
+                            <input type="range" min="1" max="10" value="5" id="hunger" />
+                            <span>10</span>
+                            <span class="range-value" id="hunger-val">5</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>רמת אנרגיה:</label>
+                        <div class="range-container">
+                            <span>1</span>
+                            <input type="range" min="1" max="10" value="5" id="energy" />
+                            <span>10</span>
+                            <span class="range-value" id="energy-val">5</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>איכות שינה:</label>
+                        <div class="range-container">
+                            <span>1</span>
+                            <input type="range" min="1" max="10" value="5" id="sleep" />
+                            <span>10</span>
+                            <span class="range-value" id="sleep-val">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📝 הערות והתרשמות כללית</h3>
+            <div class="form-group">
+                <textarea id="notes" rows="4" placeholder="איך הרגשת היום? מה הלך טוב? מה היה מאתגר?"></textarea>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="saveDay()">💾 שמור יום והמשך למחר</button>
+            <button class="btn btn-success" onclick="exportData()" id="exportBtn" style="display:none;">📤 ייצא נתונים</button>
+        </div>
+
+        <div id="savedDaysContainer" style="display:none;">
+            <div class="saved-days">
+                <h3>📅 ימים שנשמרו</h3>
+                <div id="savedDaysList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let savedDays = JSON.parse(localStorage.getItem('weightTracking') || '[]');
+        
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        
+        updateSavedDaysDisplay();
+        
+        ['breakfast-cal', 'lunch-cal', 'dinner-cal', 'snacks-cal'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateCaloriesDisplay);
+        });
+        
+        ['hunger', 'energy', 'sleep'].forEach(id => {
+            const slider = document.getElementById(id);
+            const display = document.getElementById(id + '-val');
+            slider.addEventListener('input', () => {
+                display.textContent = slider.value;
+            });
+        });
+        
+        function updateCaloriesDisplay() {
+            const breakfast = parseInt(document.getElementById('breakfast-cal').value) || 0;
+            const lunch = parseInt(document.getElementById('lunch-cal').value) || 0;
+            const dinner = parseInt(document.getElementById('dinner-cal').value) || 0;
+            const snacks = parseInt(document.getElementById('snacks-cal').value) || 0;
+            
+            const total = breakfast + lunch + dinner + snacks;
+            const target = 2416;
+            const diff = total - target;
+            
+            document.getElementById('totalCal').textContent = total;
+            
+            const diffElement = document.getElementById('calDiff');
+            if (total > 0) {
+                diffElement.textContent = (diff > 0 ? '+' : '') + diff;
+                diffElement.className = 'calories-diff ' + (diff > 0 ? 'calories-over' : 'calories-under');
+            } else {
+                diffElement.textContent = '--';
+                diffElement.className = 'calories-diff';
+            }
+        }
+        
+        function saveDay() {
+            const date = document.getElementById('date').value;
+            if (!date) {
+                alert('אנא בחר תאריך');
+                return;
+            }
+            
+            const dayData = {
+                id: Date.now(),
+                date: date,
+                weight: document.getElementById('weight').value,
+                waist: document.getElementById('waist').value,
+                breakfastFood: document.getElementById('breakfast-food').value,
+                breakfastCal: document.getElementById('breakfast-cal').value,
+                lunchFood: document.getElementById('lunch-food').value,
+                lunchCal: document.getElementById('lunch-cal').value,
+                dinnerFood: document.getElementById('dinner-food').value,
+                dinnerCal: document.getElementById('dinner-cal').value,
+                snacksFood: document.getElementById('snacks-food').value,
+                snacksCal: document.getElementById('snacks-cal').value,
+                yoga: document.getElementById('yoga').value,
+                tennis: document.getElementById('tennis').value,
+                steps: document.getElementById('steps').value,
+                work: document.getElementById('work').value,
+                hunger: document.getElementById('hunger').value,
+                energy: document.getElementById('energy').value,
+                sleep: document.getElementById('sleep').value,
+                notes: document.getElementById('notes').value,
+                totalCal: parseInt(document.getElementById('totalCal').textContent)
+            };
+            
+            savedDays.push(dayData);
+            localStorage.setItem('weightTracking', JSON.stringify(savedDays));
+            
+            alert('היום נשמר בהצלחה!');
+            
+            const tomorrow = new Date(date);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('date').value = tomorrow.toISOString().split('T')[0];
+            
+            const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+            inputs.forEach(input => {
+                if (input.id !== 'date') {
+                    input.value = '';
+                }
+            });
+            
+            ['hunger', 'energy', 'sleep'].forEach(id => {
+                document.getElementById(id).value = 5;
+                document.getElementById(id + '-val').textContent = 5;
+            });
+            
+            updateCaloriesDisplay();
+            updateSavedDaysDisplay();
+        }
+        
+        function updateSavedDaysDisplay() {
+            const container = document.getElementById('savedDaysContainer');
+            const list = document.getElementById('savedDaysList');
+            const exportBtn = document.getElementById('exportBtn');
+            
+            if (savedDays.length === 0) {
+                container.style.display = 'none';
+                exportBtn.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            exportBtn.style.display = 'inline-block';
+            exportBtn.textContent = `📤 ייצא נתונים (${savedDays.length} ימים)`;
+            
+            list.innerHTML = '';
+            savedDays.slice(-5).reverse().forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day-item';
+                dayElement.innerHTML = `
+                    <span><strong>${day.date}</strong></span>
+                    <span>${day.weight} ק"ג</span>
+                    <span>${day.totalCal} קלוריות</span>
+                    <span style="color: ${day.totalCal - 2416 > 0 ? '#f44336' : '#4CAF50'};">
+                        ${day.totalCal - 2416 > 0 ? '+' : ''}${day.totalCal - 2416}
+                    </span>
+                `;
+                list.appendChild(dayElement);
+            });
+            
+            if (savedDays.length > 5) {
+                const moreElement = document.createElement('div');
+                moreElement.style.textAlign = 'center';
+                moreElement.style.fontSize = '0.9em';
+                moreElement.style.color = '#666';
+                moreElement.textContent = `מוצגים 5 הימים האחרונים מתוך ${savedDays.length}`;
+                list.appendChild(moreElement);
+            }
+        }
+        
+        function exportData() {
+            const dataStr = JSON.stringify(savedDays, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `weight_tracking_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        updateCaloriesDisplay();
+    </script>
+</body>
+</html>
